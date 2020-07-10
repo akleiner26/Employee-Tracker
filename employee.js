@@ -74,12 +74,70 @@ const runSearch = () => {
         });
 }
 
-// SELECT * FROM employee INNER JOIN role ON role.id = employee.role
-
 const viewAllEmployees = () => {
-    let displayEmployees = connection.query("SELECT * FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id");
-    console.table(displayEmployees);
+    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id", function (err, result) {
         if (err) throw err;
+        console.table(result);
+        runSearch();
+    })
+}
+
+const viewByDepartment = () => {
+    inquirer
+        .prompt({
+            name: "department",
+            type: "list",
+            message: "Which Department would you like to view?",
+            choices: [
+                "Sales",
+                "Engineering",
+                "Finance",
+                "Legal",
+                "Back to Main Menu"
+            ]
+        }).then(function (answer) {
+            switch (answer.action) {
+                case "Sales":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Sales'", function (err, sales) {
+                        if (err) throw err;
+                        console.table(sales);
+                        runSearch();
+                    })
+                    break;
+
+                case "Engineering":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Engineering'", function (err, engineering) {
+                        if (err) throw err;
+                        console.table(engineering);
+                        runSearch();
+                    })
+                    break;
+
+                case "Finance":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Finance'", function (err, finance) {
+                        if (err) throw err;
+                        console.table(finance);
+                        runSearch();
+                    })
+                    break;
+
+                case "Legal":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Legal'", function (err, legal) {
+                        if (err) throw err;
+                        console.table(legal);
+                        runSearch();
+                    })
+                    break;
+
+                case "Back to Main Menu":
+                    runSearch();
+                    break;
+            }
+        });
+}
+
+
+
     // inquirer.prompt([
     //     {
     //         message: "Which artist would you like to search for?",
@@ -107,7 +165,7 @@ const viewAllEmployees = () => {
     //         runSearch();
     //     });
     // });
-}
+
 
 
 // function artistSearch() {
