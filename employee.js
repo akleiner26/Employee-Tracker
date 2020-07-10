@@ -96,7 +96,9 @@ const viewByDepartment = () => {
                 "Back to Main Menu"
             ]
         }).then(function (answer) {
-            switch (answer.action) {
+            switch (answer.department) {
+                default:
+                    console.log("No Choice Was")
                 case "Sales":
                     connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Sales'", function (err, sales) {
                         if (err) throw err;
