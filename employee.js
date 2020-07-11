@@ -99,7 +99,7 @@ const viewAllEmployees = async () => {
     runSearch();
 }
 
-const viewByDepartment = () => {
+const viewByDepartment = async () => {
     const departments = await queryDB(selectAll("department"));
     let departmentArr = departments.map(department => department.name);
     departmentArr.push("Back To Main Menu")
@@ -125,7 +125,7 @@ const viewByDepartment = () => {
 
 }
 
-const viewRoles = () => {
+const viewRoles = async () => {
     const roles = await queryDB(selectAll("role"));
     let roleArr = roles.map(role => role.title);
     roleArr.push("Back to Main Menu");
