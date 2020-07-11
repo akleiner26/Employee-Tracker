@@ -24,12 +24,12 @@ const runSearch = () => {
             choices: [
                 "View All Employees",
                 "View All Employees By Department",
-                "View All Employees By Manager",
+                "View All Roles",
+                // "View All Employees By Manager",
                 "Add Employee",
                 "Remove Employee",
                 "Update Employee Role",
                 "Update Employee Manager",
-                "View All Roles",
                 "Exit"
             ]
         })
@@ -42,6 +42,12 @@ const runSearch = () => {
                 case "View All Employees By Department":
                     viewByDepartment();
                     break;
+
+                
+                case "View All Roles":
+                    viewRoles();
+                    break;
+    
 
                 case "View All Employees By Manager":
                     viewByManager();
@@ -61,10 +67,6 @@ const runSearch = () => {
 
                 case "Update Employee Manager":
                     updateManager();
-                    break;
-
-                case "View All Roles":
-                    viewAll();
                     break;
 
                 case "exit":
@@ -138,8 +140,121 @@ const viewByDepartment = () => {
         });
 }
 
+const viewRoles = () => {
+    inquirer
+        .prompt({
+            name: "roles",
+            type: "list",
+            message: "Which Roles Would You Like To View?",
+            choices: [
+                "Sales Lead",
+                "Salesperson",
+                "Lead Engineer",
+                "Software Engineer",
+                "Accountant",
+                "Legal Team Lead",
+                "Lawyer",
+                "Exit"
+            ]
+        })
+        .then(function (answer) {
+            switch (answer.roles) {
+
+                case "Sales Lead":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Sales Lead'", function (err, salesLead) {
+                        if (err) throw err;
+                        console.table(salesLead);
+                        runSearch();
+                    break;
+                    })
+
+                case "Salesperson":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Salesperson'", function (err, salesperson) {
+                        if (err) throw err;
+                        console.table(salesperson);
+                        runSearch();
+                    break;
+                    })
+
+                case "Lead Engineer":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Lead Engineer'", function (err, leadEngineer) {
+                        if (err) throw err;
+                        console.table(leadEngineer);
+                        runSearch();
+                    break;
+                    })
+
+                case "Software Engineer":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Software Engineer'", function (err, softwareEngineer) {
+                        if (err) throw err;
+                        console.table(softwareEngineer);
+                        runSearch();
+                    break;
+                    })
+                case "Accountant":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Accountant'", function (err, accountant) {
+                        if (err) throw err;
+                        console.table(accountant);
+                        runSearch();
+                    break;
+                    })
+
+                case "Legal Team Lead":
+                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Legal Team Lead'", function (err, legalTeamLead) {
+                        if (err) throw err;
+                        console.table(legalTeamLead);
+                        runSearch();
+                    break;
+                    })
+
+                case "Update Employee Role":
+                    updateRole();
+                    break;
+
+                case "Update Employee Manager":
+                    updateManager();
+                    break;
+
+                case "exit":
+                    connection.end();
+                    break;
+            }
+        });
+}
 
 
+
+
+
+
+
+
+
+// const viewByManager = () => {
+//     let managerArr = [];
+//    connection.query("SELECT * FROM employeesDB.employee", function (err, employees){
+//        employees.forEach = () => {
+//            if (employees.manager === null) {
+//             managerArr.push(employees.first_name + employees.last_name)
+//            }
+//        };
+//    })
+//     inquirer
+//         .prompt({
+//             name: "byManager",
+//             type: "list",
+//             message: "Which Manager Would You Like to See?",
+//             choices: [
+//                 "Sales",
+//                 "Engineering",
+//                 "Finance",
+//                 "Legal",
+//                 "Back to Main Menu"
+//             ]
+// });
+// };
+
+// SELECT employee.id AS manager_id, employee.first_name AS manager_first_name, employee.last_name AS manager_last_name, manager.id, manager.first_name, manager.last_name FROM employee inner join employee manager on manager.manager_id = employee.id;
     // inquirer.prompt([
     //     {
     //         message: "Which artist would you like to search for?",
