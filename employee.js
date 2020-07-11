@@ -16,8 +16,8 @@ connection.connect(function (err) {
     runSearch();
 });
 
-function dbQuery(query){
-    return new Promise ((resolve,reject) => {
+function dbQuery(query) {
+    return new Promise((resolve, reject) => {
         connection.query(query, (err, res) => {
             if (err) reject(err);
             resolve(res);
@@ -105,66 +105,113 @@ const getRole = (roleTitle) => {
 const viewAllEmployees = async () => {
     console.table(query.viewAllEmployees);
     dbQuery(query.viewAllEmployees)
-    .then(console.table)
-    .catch(console.table)
+        .then(console.table)
+        .catch(console.table)
     runSearch();
 }
 
 const viewByDepartment = async () => {
     dbQuery(selectAll("department"))
-    .then(async departments => {
-    let departmentArr = departments.map(department => department.name);
-    departmentArr.push("Back To Main Menu")
-    const answer = await inquirer
-        .prompt({
-            name: "department",
-            type: "list",
-            message: "Which Department would you like to view?",
-            choices: departmentArr
-        });
+        .then(async departments => {
+            let departmentArr = departments.map(department => department.name);
+            departmentArr.push("Back To Main Menu")
+            const answer = await inquirer
+                .prompt({
+                    name: "department",
+                    type: "list",
+                    message: "Which Department would you like to view?",
+                    choices: departmentArr
+                });
 
-    switch (answer.department) {
-        case "Back to Main Menu":
-            runSearch();
-            break;
+            switch (answer.department) {
+                case "Back to Main Menu":
+                    runSearch();
+                    break;
 
-        default:
-            const data = await dbQuery(getDepartment(answer.department))
-            console.table(data);
-            runSearch();
-            break;
-    }
-}) .catch(console.log)
+                default:
+                    const data = await dbQuery(getDepartment(answer.department))
+                    console.table(data);
+                    runSearch();
+                    break;
+            }
+        }).catch(console.log)
 }
 
 const viewRoles = async () => {
     dbQuery(selectAll("role"))
-    .then(async roles => {
-    let roleArr = roles.map(role => role.title);
-    roleArr.push("Back to Main Menu");
-    const answer = await inquirer
-        .prompt({
-            name: "roles",
-            type: "list",
-            message: "Which Roles Would You Like To View?",
-            choices: roleArr
-        });
+        .then(async roles => {
+            let roleArr = roles.map(role => role.title);
+            roleArr.push("Back to Main Menu");
+            const answer = await inquirer
+                .prompt({
+                    name: "roles",
+                    type: "list",
+                    message: "Which Roles Would You Like To View?",
+                    choices: roleArr
+                });
 
-    switch (answer.roles) {
-        case "Back to Main Menu":
-            runSearch();
-            break;
+            switch (answer.roles) {
+                case "Back to Main Menu":
+                    runSearch();
+                    break;
 
-        default:
-            const data = await dbQuery(getRole(answer.roles));
-            console.table(data);
-            runSearch();
-            break;
-    }
-}) .catch(console.log);
+                default:
+                    const data = await dbQuery(getRole(answer.roles));
+                    console.table(data);
+                    runSearch();
+                    break;
+            }
+        }).catch(console.log);
 }
 
+const addEmployee = async () => {
+    dbQuery(selectAll("role"))
+        .then(async roles => {
+            let roleArr = roles.map(role => role.title);
+            managerArr = [];
+            let query = "SELECT * FROM employee";
+            connection.query(query, function (err, res) {
+                if (err) throw err;
+                for (var i = 0; i < res.length; i++) {
+                    if (res[i].manager_id = null) {
+                        managerArr.push(res[i].first_name + res[i].last_name);
+                        managerArr.push("The Chosen Employee is a Manager");
+                    }
+                }
+            })
+            const answer = await inquirer
+                .prompt([
+                    {
+                        message: "Please Enter the Employee's First Name",
+                        name: "firstName",
+                        type: "input"
+                    },
+                    {
+                        message: "Please Enter the Employee's Last Name",
+                        name: "lastName",
+                        type: "input"
+                    },
+                    {
+                        message: "Please Choose The Employee's Role",
+                        type: "list",
+                        choices: roleArr,
+                        name: newRole
+                    },
+                    {
+                        message: "Please Select the Employee's Manager",
+                        type: "list",
+                        choices: managerArr,
+                        name: managerChoice
+                    }
 
+                ])
+                .then(function(postName){
+                    connection.query("INSERT INTO employee (first_name, last_name) VALUES (?,?,?)",[postName.firstName, postName.lastName], function (err, data) {
+                        if (err) throw err;
+                    })
+                })
+        })
+}
 
 
 
