@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var cTable = require("console.table");
+var util = require("util");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -14,6 +15,8 @@ connection.connect(function (err) {
     if (err) throw err;
     runSearch();
 });
+
+const queryDB = util.promisify(connection.query);
 
 const runSearch = () => {
     inquirer
@@ -43,11 +46,11 @@ const runSearch = () => {
                     viewByDepartment();
                     break;
 
-                
+
                 case "View All Roles":
                     viewRoles();
                     break;
-    
+
 
                 case "View All Employees By Manager":
                     viewByManager();
@@ -75,151 +78,75 @@ const runSearch = () => {
             }
         });
 }
+const query = {
+    viewAllEmployees: "SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id",
+}
 
-const viewAllEmployees = () => {
-    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id", function (err, result) {
-        if (err) throw err;
-        console.table(result);
-        runSearch();
-    })
+const selectAll = (tableName) => {
+    return `SELECT * FROM employeesDB.${tableName}`;
+}
+const getDepartment = (deptName) => {
+    return `SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = '${deptName}'`
+}
+
+const getRole = (roleTitle) => {
+    return `SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = '${roleTitle}'`
+}
+
+const viewAllEmployees = async () => {
+    const result = await queryDB(query.viewAllEmployees);
+    console.table(result);
+    runSearch();
 }
 
 const viewByDepartment = () => {
-    inquirer
+    const departments = await queryDB(selectAll("department"));
+    let departmentArr = departments.map(department => department.name);
+    departmentArr.push("Back To Main Menu")
+    const answer = await inquirer
         .prompt({
             name: "department",
             type: "list",
             message: "Which Department would you like to view?",
-            choices: [
-                "Sales",
-                "Engineering",
-                "Finance",
-                "Legal",
-                "Back to Main Menu"
-            ]
-        }).then(function (answer) {
-            switch (answer.department) {
-                default:
-                    console.log("No Choice Was")
-                case "Sales":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Sales'", function (err, sales) {
-                        if (err) throw err;
-                        console.table(sales);
-                        runSearch();
-                    })
-                    break;
-
-                case "Engineering":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Engineering'", function (err, engineering) {
-                        if (err) throw err;
-                        console.table(engineering);
-                        runSearch();
-                    })
-                    break;
-
-                case "Finance":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Finance'", function (err, finance) {
-                        if (err) throw err;
-                        console.table(finance);
-                        runSearch();
-                    })
-                    break;
-
-                case "Legal":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE department.name = 'Legal'", function (err, legal) {
-                        if (err) throw err;
-                        console.table(legal);
-                        runSearch();
-                    })
-                    break;
-
-                case "Back to Main Menu":
-                    runSearch();
-                    break;
-            }
+            choices: departmentArr
         });
+
+    switch (answer.department) {
+        case "Back to Main Menu":
+            runSearch();
+            break;
+
+        default:
+            const data = await queryDB(getDepartment(answer.department))
+            console.table(data);
+            runSearch();
+            break;
+    }
+
 }
 
 const viewRoles = () => {
-    inquirer
+    const roles = await queryDB(selectAll("role"));
+    let roleArr = roles.map(role => role.title);
+    roleArr.push("Back to Main Menu");
+    const answer = await inquirer
         .prompt({
             name: "roles",
             type: "list",
             message: "Which Roles Would You Like To View?",
-            choices: [
-                "Sales Lead",
-                "Salesperson",
-                "Lead Engineer",
-                "Software Engineer",
-                "Accountant",
-                "Legal Team Lead",
-                "Lawyer",
-                "Exit"
-            ]
-        })
-        .then(function (answer) {
-            switch (answer.roles) {
-
-                case "Sales Lead":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Sales Lead'", function (err, salesLead) {
-                        if (err) throw err;
-                        console.table(salesLead);
-                        runSearch();
-                    break;
-                    })
-
-                case "Salesperson":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Salesperson'", function (err, salesperson) {
-                        if (err) throw err;
-                        console.table(salesperson);
-                        runSearch();
-                    break;
-                    })
-
-                case "Lead Engineer":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Lead Engineer'", function (err, leadEngineer) {
-                        if (err) throw err;
-                        console.table(leadEngineer);
-                        runSearch();
-                    break;
-                    })
-
-                case "Software Engineer":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Software Engineer'", function (err, softwareEngineer) {
-                        if (err) throw err;
-                        console.table(softwareEngineer);
-                        runSearch();
-                    break;
-                    })
-                case "Accountant":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Accountant'", function (err, accountant) {
-                        if (err) throw err;
-                        console.table(accountant);
-                        runSearch();
-                    break;
-                    })
-
-                case "Legal Team Lead":
-                    connection.query("SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id, role.title, role.salary, department.name AS department FROM employee INNER JOIN role ON role.id = employee.role_id INNER JOIN department ON department.id = role.department_id WHERE role.title = 'Legal Team Lead'", function (err, legalTeamLead) {
-                        if (err) throw err;
-                        console.table(legalTeamLead);
-                        runSearch();
-                    break;
-                    })
-
-                case "Update Employee Role":
-                    updateRole();
-                    break;
-
-                case "Update Employee Manager":
-                    updateManager();
-                    break;
-
-                case "exit":
-                    connection.end();
-                    break;
-            }
+            choices: roleArr
         });
+    switch (answer.roles) {
+        case "Back to Main Menu":
+            runSearch();
+            break;
+
+        default:
+            const data = await queryDB(getRole(answer.roles));
+            console.table(data);
+            runSearch();
+            break;
+    };
 }
 
 
