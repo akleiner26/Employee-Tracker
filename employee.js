@@ -16,6 +16,15 @@ connection.connect(function (err) {
     runSearch();
 });
 
+function dbQuery(query){
+    return new Promise ((resolve,reject) => {
+        connection.query(query, (err, res) => {
+            if (err) reject(err);
+            resolve(res);
+        })
+    })
+}
+
 const queryDB = util.promisify(connection.query);
 
 const runSearch = () => {
@@ -94,13 +103,16 @@ const getRole = (roleTitle) => {
 }
 
 const viewAllEmployees = async () => {
-    const result = await queryDB(query.viewAllEmployees);
-    console.table(result);
+    console.table(query.viewAllEmployees);
+    dbQuery(query.viewAllEmployees)
+    .then(console.table)
+    .catch(console.table)
     runSearch();
 }
 
 const viewByDepartment = async () => {
-    const departments = await queryDB(selectAll("department"));
+    dbQuery(selectAll("department"))
+    .then(async departments => {
     let departmentArr = departments.map(department => department.name);
     departmentArr.push("Back To Main Menu")
     const answer = await inquirer
@@ -117,16 +129,17 @@ const viewByDepartment = async () => {
             break;
 
         default:
-            const data = await queryDB(getDepartment(answer.department))
+            const data = await dbQuery(getDepartment(answer.department))
             console.table(data);
             runSearch();
             break;
     }
-
+}) .catch(console.log)
 }
 
 const viewRoles = async () => {
-    const roles = await queryDB(selectAll("role"));
+    dbQuery(selectAll("role"))
+    .then(async roles => {
     let roleArr = roles.map(role => role.title);
     roleArr.push("Back to Main Menu");
     const answer = await inquirer
@@ -136,17 +149,19 @@ const viewRoles = async () => {
             message: "Which Roles Would You Like To View?",
             choices: roleArr
         });
+
     switch (answer.roles) {
         case "Back to Main Menu":
             runSearch();
             break;
 
         default:
-            const data = await queryDB(getRole(answer.roles));
+            const data = await dbQuery(getRole(answer.roles));
             console.table(data);
             runSearch();
             break;
-    };
+    }
+}) .catch(console.log);
 }
 
 
