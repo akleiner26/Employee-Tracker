@@ -185,7 +185,7 @@ const addEmployee = async () => {
                         message: "Please Enter the Employee's First Name",
                         name: "firstName",
                         type: "input"
-                    },
+                    }]
                     {
                         message: "Please Enter the Employee's Last Name",
                         name: "lastName",
@@ -195,18 +195,18 @@ const addEmployee = async () => {
                         message: "Please Choose The Employee's Role",
                         type: "list",
                         choices: roleArr,
-                        name: newRole
+                        name: "newRole"
                     },
                     {
                         message: "Please Select the Employee's Manager",
                         type: "list",
                         choices: managerArr,
-                        name: managerChoice
+                        name: "managerChoice"
                     }
 
                 ])
                 .then(function(postName){
-                    connection.query("INSERT INTO employee (first_name, last_name) VALUES (?,?,?)",[postName.firstName, postName.lastName], function (err, data) {
+                    connection.query("INSERT INTO employee (first_name, last_name) VALUES (?,?)",[postName.firstName, postName.lastName], function (err, data) {
                         if (err) throw err;
                     })
                 })
