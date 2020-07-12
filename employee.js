@@ -37,9 +37,9 @@ const runSearch = () => {
                 "View All Employees",
                 "View All Employees By Department",
                 "View All Roles",
-                // "View All Employees By Manager",
+                "Add Department",
                 "Add Employee",
-                "Remove Employee",
+                "Add Role",
                 "Update Employee Role",
                 "Update Employee Manager",
                 "Exit"
@@ -61,16 +61,16 @@ const runSearch = () => {
                     break;
 
 
-                case "View All Employees By Manager":
-                    viewByManager();
+                case "Add Department":
+                    addDepartment();
                     break;
 
                 case "Add Employee":
                     addEmployee();
                     break;
 
-                case "Remove Employee":
-                    removeEmployee();
+                case "Add Role":
+                    addRole();
                     break;
 
                 case "Update Employee Role":
@@ -166,51 +166,113 @@ const viewRoles = async () => {
 
 const addEmployee = async () => {
     dbQuery(selectAll("role"))
-        .then(async roles => {
+        .then(roles => {
             let roleArr = roles.map(role => role.title);
             managerArr = [];
+            managerIDArr = [];
             let query = "SELECT * FROM employee";
             connection.query(query, function (err, res) {
                 if (err) throw err;
                 for (var i = 0; i < res.length; i++) {
-                    if (res[i].manager_id = null) {
+                    if (res[i].manager_id === null) {
                         managerArr.push(res[i].first_name + res[i].last_name);
-                        managerArr.push("The Chosen Employee is a Manager");
+                        managerIDArr.push(res[i].id);
                     }
                 }
-            })
-            const answer = await inquirer
-                .prompt([
-                    {
-                        message: "Please Enter the Employee's First Name",
-                        name: "firstName",
-                        type: "input"
-                    }]
-                    {
-                        message: "Please Enter the Employee's Last Name",
-                        name: "lastName",
-                        type: "input"
-                    },
-                    {
-                        message: "Please Choose The Employee's Role",
-                        type: "list",
-                        choices: roleArr,
-                        name: "newRole"
-                    },
-                    {
-                        message: "Please Select the Employee's Manager",
-                        type: "list",
-                        choices: managerArr,
-                        name: "managerChoice"
-                    }
+                const answer = inquirer
+                    .prompt([
+                        {
+                            message: "Please Enter the Employee's First Name",
+                            name: "firstName",
+                            type: "input"
+                        },
+                        {
+                            message: "Please Enter the Employee's Last Name",
+                            name: "lastName",
+                            type: "input"
+                        },
+                        {
+                            message: "Please Choose The Employee's Role",
+                            type: "list",
+                            choices: roleArr,
+                            name: "newRole"
+                        },
+                        {
+                            message: "Please Select the Employee's Manager",
+                            type: "list",
+                            choices: managerArr,
+                            name: "managerChoice"
+                        }
 
-                ])
-                .then(function(postName){
-                    connection.query("INSERT INTO employee (first_name, last_name) VALUES (?,?)",[postName.firstName, postName.lastName], function (err, data) {
-                        if (err) throw err;
+                    ])
+                    .then(function (postName) {
+                        var roleID = roleArr.indexOf(postName.newRole) + 1;
+                        var managerID = managerIDArr[managerArr.indexOf(postName.managerChoice)];
+                        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)", [postName.firstName, postName.lastName, roleID, managerID], function (err, data) {
+                            if (err) throw err;
+                            console.log("You're Employee Was Added!");
+                            runSearch();
+                        })
                     })
-                })
+            })
         })
+}
+
+const addDepartment = () => {
+    dbQuery(selectAll("department"))
+        .then(departments => {
+            let departmentArr = departments.map(department => department.name);
+        })
+    const answer = inquirer.prompt([
+        {
+            message: "Please Enter the name of the department you'd like to add",
+            name: "newDept",
+            type: "input"
+        }
+    ]).then(function (postDept) {
+        var deptID = departmentArr.length + 1;
+        connection.query("INSERT INTO department (id, name) VALUES (?,?)", [deptID, postDept.newDept], function (err, data) {
+            if (err) throw err;
+            console.log("Your Department Was Added!");
+            runSearch();
+        })
+    })
+}
+
+const addRole = () => {
+    dbQuery(selectAll("role"))
+        .then(roles => {
+            let roleArr = roles.map(role => role.title);
+            (departments => {
+                let departmentArr = departments.map(department => department.name);
+            })
+        })
+    const answer = inquirer.prompt([
+        {
+            message: "What is the name of the role you'd like to add?",
+            name: "newName",
+            type: "input"
+        },
+        {
+            message: "What is the salary of this new role?",
+            name: "newSalary",
+            type:"input"
+        },
+        {
+            message: "What department is this role in?",
+            name: "deptName",
+            type: "list",
+            choice: departmentArr
+        }
+    ]).then (function (postRole) {
+        var roleID = roleArr.length + 1;
+        var deptID = departmentArr.indexOf(postRole.deptName)
+        connection.query("INSERT INTO role (id, title, salary, department_id) VALUE (?,?,?,?)", [roleID, postRole.newName, postRole.newSalary, deptID], function (err, data) {
+            if (err) throw err;
+            console.log("Your Role Was Added!")
+            runSearch();
+        })
+    })
 }
 
 
