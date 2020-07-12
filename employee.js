@@ -281,6 +281,7 @@ const addRole = () => {
 
 
 
+
 // const viewByManager = () => {
 //     let managerArr = [];
 //    connection.query("SELECT * FROM employeesDB.employee", function (err, employees){
