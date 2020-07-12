@@ -2,12 +2,13 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 var cTable = require("console.table");
 var util = require("util");
+require("dotenv").config();
 
 var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "Phillies35",
+    password: process.env.DB_PASS,
     database: "employeesDB"
 });
 
