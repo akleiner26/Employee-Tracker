@@ -112,10 +112,8 @@ const getRole = (roleTitle) => {
 }
 
 const viewAllEmployees = async () => {
-    console.table(query.viewAllEmployees);
-    dbQuery(query.viewAllEmployees)
-        .then(console.table)
-        .catch(console.table)
+    let data = await dbQuery(query.viewAllEmployees)
+    console.table(data);
     runSearch();
 }
 
@@ -299,9 +297,9 @@ const updateRole = async () => {
             let query = "SELECT * FROM employee";
             connection.query(query, function (err, res) {
                 for (var i = 0; i < res.length; i++) {
-                    employeeArr.push(res[i].first_name + res[i].last_name);
+                    employeeArr.push(res[i].first_name + " " + res[i].last_name);
                     if (res[i].manager_id === null) {
-                        managerArr.push(res[i].first_name + res[i].last_name);
+                        managerArr.push(res[i].first_name + " " + res[i].last_name);
                         managerIDArr.push(res[i].id);
                     }
                 }
@@ -325,13 +323,18 @@ const updateRole = async () => {
                         choices: managerArr
                     }
                 ]).then(function (postRole) {
+                    let newEmployee = postRole.chosenEmployee.split(" ");
+                    var employee = {
+                        firstName: newEmployee[0],
+                        lastName: newEmployee[1]
+                    }
                     var roleID = roleArr.indexOf(postRole.newRole) + 1;
                     var managerID = managerIDArr[managerArr.indexOf(postRole.managerChoice)];
-                    connection.query("UPDATE employee SET (role_id, manager_id) WHERE employee.first_name + employee.last_name === postRole.chosenEmployee VALUES (?,?)", [roleID, managerID]), function (err, data) {
+                    connection.query("UPDATE employee SET role_id = (?), manager_id = (?) WHERE employee.first_name = ? AND employee.last_name = ?", [roleID, managerID, employee.firstName, employee.lastName]), function (err, data) {
                         if (err) throw err;
-                        console.log("Your Roll was Updated!");
-                        runSearch();
                     }
+                    console.log("Your Roll was Updated!");
+                    runSearch();
                 })
             })
         })
