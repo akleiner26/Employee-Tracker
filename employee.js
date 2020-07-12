@@ -235,40 +235,81 @@ const addDepartment = () => {
 }
 
 const addRole = () => {
-    dbQuery(selectAll("role"))
-        .then(roles => {
-            let roleArr = roles.map(role => role.title);
-            (departments => {
-                let departmentArr = departments.map(department => department.name);
-                const answer = inquirer.prompt([
-                    {
-                        message: "What is the name of the role you'd like to add?",
-                        name: "newName",
-                        type: "input"
-                    },
-                    {
-                        message: "What is the salary of this new role?",
-                        name: "newSalary",
-                        type: "input"
-                    },
-                    {
-                        message: "What department is this role in?",
-                        name: "deptName",
-                        type: "list",
-                        choice: departmentArr
+    dbQuery(selectAll('department')).then((departments) => {
+        const departmentArr = departments.map(({ id, name }) => ({
+            name: name,
+            value: id,
+        }));
+        const answer = inquirer
+            .prompt([
+                {
+                    message: "What is the name of the role you'd like to add?",
+                    name: 'newName',
+                    type: 'input',
+                },
+                {
+                    message: 'What is the salary of this new role?',
+                    name: 'newSalary',
+                    type: 'input',
+                },
+                {
+                    message: 'What department is this role in?',
+                    name: 'deptName',
+                    type: 'list',
+                    choices: departmentArr,
+                },
+            ])
+            .then(function (postRole) {
+                const dept = departmentArr.find(
+                    (department) => department.name === postRole.deptName);
+                connection.query(
+                    'INSERT INTO role (title, salary, department_id) VALUE (?,?,?)',
+                    [postRole.newName, postRole.newSalary, dept.id],
+                    function (err, data) {
+                    if (err) throw err;
+                        console.log('Your Role Was Added!');
+                         runSearch();
                     }
-                ]).then(function (postRole) {
-                    var roleID = roleArr.length + 1;
-                    var deptID = departmentArr.indexOf(postRole.deptName)
-                    connection.query("INSERT INTO role (id, title, salary, department_id) VALUE (?,?,?,?)", [roleID, postRole.newName, postRole.newSalary, deptID], function (err, data) {
-                        if (err) throw err;
-                        console.log("Your Role Was Added!")
-                        runSearch();
-                    })
-                })
-            })
-        })
-}
+                );
+            });
+    });
+};
+
+// const addRole = () => {
+//     dbQuery(selectAll("role"))
+//         .then(roles => {
+//             let roleArr = roles.map(role => role.title);
+//             (departments => {
+//                 let departmentArr = departments.map(department => department.name);
+//                 const answer = inquirer.prompt([
+//                     {
+//                         message: "What is the name of the role you'd like to add?",
+//                         name: "newName",
+//                         type: "input"
+//                     },
+//                     {
+//                         message: "What is the salary of this new role?",
+//                         name: "newSalary",
+//                         type: "input"
+//                     },
+//                     {
+//                         message: "What department is this role in?",
+//                         name: "deptName",
+//                         type: "list",
+//                         choice: departmentArr
+//                     }
+//                 ]).then(function (postRole) {
+//                     var roleID = roleArr.length + 1;
+//                     var deptID = departmentArr.indexOf(postRole.deptName)
+//                     connection.query("INSERT INTO role (id, title, salary, department_id) VALUE (?,?,?,?)", [roleID, postRole.newName, postRole.newSalary, deptID], function (err, data) {
+//                         if (err) throw err;
+//                         console.log("Your Role Was Added!")
+//                         runSearch();
+//                     })
+//                 })
+//             })
+//         })
+// }
 
 const updateRole = async () => {
     dbQuery(selectAll("role"))
