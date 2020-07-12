@@ -35,7 +35,7 @@ AndrewJKleiner@gmail.com
 
 ## Screenshots
 ### Running the Schema
-<img src="./Assets/screenshots/schema.png" alt = "Screenshot of Running the Schema in MYSQL">
+<img src="./Assets/screenshots/createSchema.png" alt = "Screenshot of Running the Schema in MYSQL">
 
 ### Running the Seeds
 <img src="./Assets/screenshots/seeds.png" alt = "Screenshot of Running the Seeds in MYSQL">
