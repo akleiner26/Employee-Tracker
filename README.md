@@ -11,6 +11,8 @@ This application uses the command line interface to interact with 3 databases he
 2) [Usage](#Usage)
 3) [Contributors](#Contributors)
 4) [GitHub](#GitHub)
+5) [Walkthrough Video](#walkthrough-video)
+6) [Screenshots](Screenshots)
 
 ## Installation:
 All dependencies are held in the package.json file. By entering "npm i" into your command line, they will all be downloaded locally. You must connect MYSQL with a password in order for the database to connect. You can populate the database by copying and pasting (in order) the employeeDBSchema.sql file followed by employeeSeeds.sql into your workbench.
@@ -32,6 +34,9 @@ https://github.com/akleiner26
 
 ## GitHub Email:
 AndrewJKleiner@gmail.com
+
+## Walkthrough Video
+[Link to Walkthrough](https://drive.google.com/file/d/10uk-MLc0iQmJc5h9TmjPn1b5Boi47dbF/view)
 
 ## Screenshots
 ### Running the Schema
